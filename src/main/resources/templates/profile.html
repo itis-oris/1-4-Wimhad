@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Профиль</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container mt-5">
+    <h2>Профиль пользователя</h2>
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title" th:text="${user.fullName}"></h5>
+            <p class="card-text"><b>Имя пользователя:</b> <span th:text="${user.fullName}"></span></p>
+            <p class="card-text"><b>Email:</b> <span th:text="${user.email}"></span></p>
+            <p class="card-text"><b>Роль:</b> <span th:text="${user.role}"></span></p>
+        </div>
+    </div>
+    <a href="/offers" class="btn btn-primary mt-3">К предложениям</a>
+    <a href="/logout" class="btn btn-secondary mt-3">Выйти</a>
+
+    <div class="mt-5">
+        <h3>Заявки на ваши предложения</h3>
+        <table class="table table-bordered" th:if="${offerRequests != null and #lists.size(offerRequests) > 0}">
+            <thead>
+            <tr>
+                <th>Навык</th>
+                <th>Заголовок заявки</th>
+                <th>Описание</th>
+                <th>Дата</th>
+                <th>Статус</th>
+                <th>Кто заказал</th>
+                <th>Email заказчика</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="req : ${offerRequests}">
+                <td th:text="${req.skill != null ? req.skill.name : '—'}"></td>
+                <td th:text="${req.title}"></td>
+                <td th:text="${req.description}"></td>
+                <td th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td>
+                    <form th:action="@{'/requests/' + ${req.id} + '/status'}" method="post" style="display:inline;">
+                        <select name="status" class="form-select form-select-sm d-inline w-auto" th:value="${req.status}">
+                            <option value="NEW" th:selected="${req.status == 'NEW'}">Новая</option>
+                            <option value="IN_PROGRESS" th:selected="${req.status == 'IN_PROGRESS'}">В процессе</option>
+                            <option value="COMPLETED" th:selected="${req.status == 'COMPLETED'}">Завершена</option>
+                            <option value="REJECTED" th:selected="${req.status == 'REJECTED'}">Отклонена</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-primary">OK</button>
+                    </form>
+                    <form th:action="@{'/requests/' + ${req.id} + '/delete'}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger">Удалить</button>
+                    </form>
+                </td>
+                <td th:text="${req.user != null ? req.user.username : '—'}"></td>
+                <td th:text="${req.user != null ? req.user.email : '—'}"></td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${offerRequests == null or #lists.size(offerRequests) == 0}" class="alert alert-info mt-3">Пока нет заявок на ваши предложения.</div>
+    </div>
+
+    <div class="mt-5">
+        <h3>Мои заказы</h3>
+        <table class="table table-bordered" th:if="${myRequests != null and #lists.size(myRequests) > 0}">
+            <thead>
+            <tr>
+                <th>Навык</th>
+                <th>Заголовок заявки</th>
+                <th>Описание</th>
+                <th>Дата заказа</th>
+                <th>Статус</th>
+                <th>Исполнитель</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:each="req : ${myRequests}">
+                <td th:text="${req.skill != null ? req.skill.name : '—'}"></td>
+                <td th:text="${req.title}"></td>
+                <td th:text="${req.description}"></td>
+                <td th:text="${#temporals.format(req.createdAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td>
+                    <span class="badge" 
+                          th:classappend="${req.status == 'NEW' ? 'bg-primary' : 
+                                         req.status == 'IN_PROGRESS' ? 'bg-warning' : 
+                                         req.status == 'COMPLETED' ? 'bg-success' : 
+                                         req.status == 'REJECTED' ? 'bg-danger' : 'bg-secondary'}"
+                          th:text="${req.status == 'NEW' ? 'Новая' : 
+                                  req.status == 'IN_PROGRESS' ? 'В процессе' : 
+                                  req.status == 'COMPLETED' ? 'Завершена' : 
+                                  req.status == 'REJECTED' ? 'Отклонена' : req.status}">
+                    </span>
+                </td>
+                <td>
+                    <span th:text="${requestService.getExecutorsForRequest(req)}"></span>
+                </td>
+            </tr>
+            </tbody>
+        </table>
+        <div th:if="${myRequests == null or #lists.size(myRequests) == 0}" class="alert alert-info mt-3">У вас пока нет заказов.</div>
+    </div>
+</div>
+</body>
+</html> 

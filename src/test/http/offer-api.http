@@ -1,0 +1,32 @@
+### Получить все предложения
+GET http://localhost:8081/api/v1/offers
+Accept: application/json
+
+### Получить предложение по ID
+GET http://localhost:8081/api/v1/offers/1
+Accept: application/json
+
+### Создать новое предложение
+POST http://localhost:8081/api/v1/offers
+Content-Type: application/json
+
+{
+  "title": "Test Offer",
+  "description": "Test description",
+  "price": 123.45,
+  "currency": "RUB"
+}
+
+### Обновить предложение
+PUT http://localhost:8081/api/v1/offers/1
+Content-Type: application/json
+
+{
+  "title": "Updated Offer",
+  "description": "Updated description",
+  "price": 200.00,
+  "currency": "RUB"
+}
+
+### Удалить предложение
+DELETE http://localhost:8081/api/v1/offers/1

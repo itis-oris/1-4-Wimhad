@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр предложения</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css">
+    <style>
+        .currency-badge {
+            font-size: 1.2em;
+            padding: 4px 8px;
+            border-radius: 4px;
+            margin-left: 8px;
+        }
+        .status-active {
+            color: #28a745;
+        }
+        .status-inactive {
+            color: #dc3545;
+        }
+    </style>
+</head>
+<body>
+<div th:replace="~{fragments/header :: header}"></div>
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8">
+            <h2 th:text="${offer.title}"></h2>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <h5 class="card-title">
+                                <i class="bi bi-tools"></i> Навык: 
+                                <span class="badge bg-primary" th:text="${offer.skill != null ? offer.skill.name : '—'}"></span>
+                            </h5>
+                        </div>
+                        <div class="col-md-6 text-end">
+                            <span th:if="${offer.isActive}" class="status-active">
+                                <i class="bi bi-check-circle"></i> Активно
+                            </span>
+                            <span th:unless="${offer.isActive}" class="status-inactive">
+                                <i class="bi bi-x-circle"></i> Неактивно
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3" th:if="${offer.description}">
+                        <h6><i class="bi bi-card-text"></i> Описание:</h6>
+                        <p class="card-text" th:text="${offer.description}"></p>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="bi bi-currency-dollar"></i> Цена:</h6>
+                        <span th:if="${offer.price != null}">
+                            <span class="h5" th:text="${#numbers.formatDecimal(offer.price, 1, 2)}"></span>
+                            <span th:if="${offer.currency == 'RUB'}" class="currency-badge bg-danger">₽</span>
+                            <span th:if="${offer.currency == 'USD'}" class="currency-badge bg-success">$</span>
+                            <span th:if="${offer.currency == 'EUR'}" class="currency-badge bg-warning">€</span>
+                        </span>
+                        <span th:unless="${offer.price != null}" class="text-muted h5">Бесплатно</span>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <h6><i class="bi bi-person"></i> Автор:</h6>
+                        <p class="card-text" th:text="${offer.user != null ? offer.user.fullName : '—'}"></p>
+                    </div>
+                    
+                    <div class="mb-3" th:if="${offer.createdAt != null}">
+                        <h6><i class="bi bi-calendar"></i> Создано:</h6>
+                        <p class="card-text" th:text="${#temporals.format(offer.createdAt, 'dd.MM.yyyy HH:mm')}"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5><i class="bi bi-gear"></i> Действия</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="/offers" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Назад к списку
+                        </a>
+                        
+                        <!-- Edit button for owner or admin -->
+                        <a th:if="${currentUsername != null and (offer.user.username == currentUsername or currentUserRole == 'ADMIN')}" 
+                           th:href="@{'/offers/' + ${offer.id} + '/edit'}" 
+                           class="btn btn-warning">
+                            <i class="bi bi-pencil"></i> Редактировать
+                        </a>
+                        
+                        <!-- Order button for other users -->
+                        <form th:if="${currentUsername != null and offer.user.username != currentUsername and offer.isActive}" 
+                              th:action="@{'/offers/' + ${offer.id} + '/order'}" 
+                              method="post">
+                            <button type="submit" class="btn btn-success w-100">
+                                <i class="bi bi-cart-plus"></i> Заказать
+                            </button>
+                        </form>
+                        
+                        <div th:if="${currentUsername != null and offer.user.username != currentUsername and !offer.isActive}" 
+                             class="alert alert-warning">
+                            <i class="bi bi-exclamation-triangle"></i> Предложение неактивно
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div th:if="${success}" class="alert alert-success mt-3" th:text="${success}"></div>
+</div>
+
+<!-- Bootstrap Icons -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+</body>
+</html> 
